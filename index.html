@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <script src="https://unpkg.com/vue@3"></script>
+<div class="container mt-3">
+    <div class="row">
+        <h1>Для друга из квартиры 45, которого зовут Вадим ))</h1>
+    </div>
+</div>
+    <div id="app">
+
+
+        <div class="container mt-5 mb-3">
+            <div class="row">
+                <div class="col">
+                    <!-- <div class="mb-3">
+                        <label for="flips" class="form-label">Сколько прогнозов  планируете сделать? </label>
+                        <input v-model="flips" type="number" class="form-control"  placeholder="Введите число игр...">
+                      </div> -->
+
+                      <div class="mb-3">
+                        <label for="balance" class="form-label">Ваш баланс на данный момент </label>
+                        <input v-model.number="balance" type="number" class="form-control"  placeholder="Введите количество наличных...">
+                      </div>
+
+                      <div class="mb-3">
+                        <label for="frequency" class="form-label">Сколько игр надо сыграть, чтобы исход матча совпал хотя бы 1 раз? </label>
+                        <input v-model.number="frequency" type="number" class="form-control"  placeholder="Введите частоту угадывания исхода события...">
+                      </div>
+                      <div class="mb-3">
+                        <label for="bet" class="form-label">Размер ставки (в рублях)</label>
+                        <input v-model.number="bet" type="number" class="form-control"  placeholder="Сумма ставки...">
+                      </div>
+                      <div class="mb-3">
+                        <label for="coefficient" class="form-label">Коэффициент </label>
+                        <input v-model.number="coefficient" type="number" class="form-control"  placeholder="Коэффициент ставки...">
+                      </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="container mt-3 mb-5">
+            <div class="row">
+                <!-- <div v-if="flips" class="col-12 mb-2">Вы планируете угадывать {{ flips }}  раз </div> -->
+                <div v-if="balance" class="col-12 mb-2"> На Вашем счету  {{ balance }} рублей </div>
+                <div v-if="frequency" class="col-12 mb-2">Частота угадывания исхода: {{ Math.floor(100/frequency) }}  % </div>
+                <div v-if="bet" class="col-12 mb-2">Ставка: {{ bet }} рублей </div>
+                <div v-if="coefficient" class="col-12 mb-2">Коэффициент выигрыша: {{ coefficient }}  </div>
+               
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <button @click="play" type="button" class="btn btn-success">Рассчитать мою перспективу</button>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h4>Результаты игры</h4>
+            <h6>
+                Сделано {{ gameCount }} прогнозов.
+            </h6>
+            <h6> 
+                Угадано {{ wins }} прогнозов.
+            </h6>
+            <h6>
+                Не угадано {{ lost }} прогнозов.
+            </h6>
+            <h6>
+                Баланс {{ balance }} рублей.
+            </h6>
+            
+        </div>
+    </div>
+    <div class="row">
+        <h2> Подробные данные игр </h2>
+        
+            <div class="row" v-for="game of baseData" :key="game">
+                <div class="col-3">{{ game.count }}</div>
+                <div class="col-3">{{ game.res }}</div>
+                <div class="col-3">{{ game.balance }}</div>
+            </div>
+        
+    </div>
+</div>
+
+    </div>
+    
+    <script>
+      const { createApp } = Vue
+    
+      createApp({
+        data() {
+          return {
+            // flips: null,
+            balance: 10000,
+            frequency: 6,
+            bet: 1000,
+            coefficient: 4,
+            result_of_the_match: null,
+            player_move: null,
+            wins: null,
+            lost: null,
+            gameCount: null,
+            baseData: [],
+            result: {
+                count: 0,
+                res: 0,
+                balance: 0,
+            }
+
+
+
+
+
+          }
+        },
+        methods: {
+            play() {
+          this.lost = 0
+          this.wins = 0
+          this.gameCount = 0
+                while (this.balance > 0 ){
+                    this.result_of_the_match = this.getRandomInt(this.frequency)
+                this.player_move = this.getRandomInt(this.frequency)
+                console.log(this.result_of_the_match, this.player_move)
+                if(this.result_of_the_match !== this.player_move)
+                { 
+                    this.balance = this.balance - this.bet
+                    // console.log('Пользователь прогадал ...')
+                    
+                    this.result.count = this.gameCount
+                    this.result.res = 'прогадал'
+                    this.result.balance = this.balance
+                    this.baseData.push(this.result)
+                    this.lost++
+                    this.gameCount++
+                    this.result = {}
+                    
+                    
+                }
+                else {
+                    this.balance = (this.balance - this.bet) + (this.bet * this.coefficient)
+                    // console.log('Пользователю повезло ...')
+                    
+                    this.result.count =this.gameCount
+                    this.result.res = 'выигрыш'
+                    this.result.balance = this.balance 
+                    this.baseData.push(this.result)
+                    this.wins++
+                    this.gameCount++
+                    this.result = {}
+                    
+                    
+
+
+                }
+                
+                // this.flips++
+                // console.log(this.balance, this.gameCount)
+                }
+            //  console.log('game over')
+
+            },
+            getRandomInt(max) {
+                return Math.floor(Math.random() * max)
+            },
+        }
+      }).mount('#app')
+    </script>
+</body>
+</html>
